@@ -51,17 +51,33 @@ class ParserExplainer(object):
         expected_str = match.group(2)
     
         if(expected_str == "EOF" ):
+            # This error is generated when the first part of an expression is valid but the string
+            # continues and contains more characters than the grammar rules can handle.
+            # Splitting the input string into 2 parts, then re-parsing each. The first is likely
+            # to be a valid HGVS expression, while the latter portion is unlikely to be valid.
             part1, part2 = v[:char_pos], v[char_pos+1:]
-            part2 = part2.strip() # part1 is likely valid, but part2 might have whitespace
+            part2 = part2.strip()
             print( "got an EOF, creating [{part1}], [{part2}]".format(part1=part1, part2=part2))
 
             # try to parse each half separately
-            v1 = self._hgvs_parser.parse( part1, explain=True )
-            if( v1 ):
-                print("rescued and parsed part1:", v1)
-            v2 = self._hgvs_parser.parse( part2, explain=True )
-            if( v2 ):
-                print("rescued and parsed part2:", v2)
+            results = []
+            for part in ( part1, part2):
+                hgvs = self._hgvs_parser.parse( part1, explain=True )
+                if( hgvs ):
+                    # Valid HGVS expression, got an HGVS object
+                    print("rescued and parsed part1:", hgvs)
+                    hgvs_e = HGVSExplained( orig_var_string=part1, hgvs_obj=hgvs )
+                    results.append(hgvs_e)
+                else:
+                    # Invalid expression that is not handled by ParserExplainer
+                    # create hgvs_e, add to results
+                    pass
+                    #hgvs_e = HGVSExplained( orig_var_string=part1, hgvs_parser_exc=exc, hgvs_error_type='TBD' )
+                    #expl_list = self._explain(v, exc) # this should return a list of HGVSExplained objects
+                    # return HGVSExplained object
+    #                    def __init__(self, *, orig_var_string, hgvs_obj=None, hgvs_parser_exc=None, hgvs_error_type=None ):
+            return results
+
 
         elif( expected_str == "a digit" ):
             # checking for 'p.' and '{AA}{\d+}{AA}'
