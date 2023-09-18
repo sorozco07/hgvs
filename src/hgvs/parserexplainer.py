@@ -31,11 +31,15 @@ class ParserExplainer(object):
         self._orig_var_string = v
 
         try:
+            print("trying to parse [{v}]".format(v=v))
             hgvs = self._hgvs_parser.parse_hgvs_variant(v)
+            print("got a {t} object and putting it in hgvs_obj".format(t=type(hgvs)))
             return HGVSExplained( orig_var_string=v, hgvs_obj=hgvs )
         except HGVSParseError as exc:
+            print("HGVS parsing failed, calling _explain()")
             hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='TBD' )
             expl_list = self._explain(v, exc) # this should return a list of HGVSExplained objects
+            print("got results from explaining [{v}], [{n}] elements in list".format(v=v, n=len(expl_list)))
             hgvs_e.add_explained( *expl_list )
             return hgvs_e
 
