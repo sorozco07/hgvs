@@ -16,7 +16,7 @@ import parsley
 from pkg_resources import resource_filename
 
 import hgvs.edit
-import parserexplainer
+from hgvs import parserexplainer
 
 # The following imports are referenced by fully-qualified name in the
 # hgvs grammar.

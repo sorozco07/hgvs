@@ -6,6 +6,8 @@ to the official HGVS spec (when initial parsing throws an exception).
 """
 
 import re
+from hgvs.exceptions import HGVSParseError
+
 class ParserExplainer(object):
     """Provides ...
 
@@ -24,11 +26,10 @@ class ParserExplainer(object):
         :param str v: an HGVS-formatted variant as a string
 
         """
-
         self._orig_var_string = v
 
         try:
-            return self.parse_hgvs_variant(v)
+            return self._hgvs_parser.parse_hgvs_variant(v)
         except HGVSParseError as exc:
             self._explain(v, exc)
         
@@ -52,10 +53,10 @@ class ParserExplainer(object):
             print( "got an EOF, creating [{part1}], [{part2}]".format(part1=part1, part2=part2))
 
             # try to parse each half separately
-            v1 = self.parse( part1, explain=True )
+            v1 = self._hgvs_parser.parse( part1, explain=True )
             if( v1 ):
                 print("rescued and parsed part1:", v1)
-            v2 = self.parse( part2, explain=True )
+            v2 = self._hgvs_parser.parse( part2, explain=True )
             if( v2 ):
                 print("rescued and parsed part2:", v2)
 
