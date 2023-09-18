@@ -32,14 +32,18 @@ class ParserExplainer(object):
         try:
             return self._hgvs_parser.parse_hgvs_variant(v)
         except HGVSParseError as exc:
-            self._explain(v, exc)
-        
+            hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='TBD' )
+            expl_list = self._explain(v, exc) # this should return a list of HGVSExplained objects
+            hgvs_e.add_explained( *expl_list )
+            return hgvs_e
+
+    # handles exc, chunk-ifies, calls parse_hgvs_variant_explain() on chunks, returns list of HGVSExplained objects
     def _explain(self, v, exc):
         match = re.search( "char (\d+): expected (.+)$", exc.args[0] )
-        
-        if( not match ):
-            msg = "[{v}] bombed, cannot handle this error yet: {exc}".format(v=v, exc=exc)
-            raise exc( msg ) # pass the exception through (todo: check syntax)
+
+            if( not match ):
+                msg = "[{v}] bombed, cannot handle this error yet: {exc}".format(v=v, exc=exc)
+                raise exc( msg ) # pass the exception through (todo: check syntax)
 
         char_pos = int(match.group(1))
         expected_str = match.group(2)
