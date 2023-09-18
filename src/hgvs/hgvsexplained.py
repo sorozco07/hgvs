@@ -28,3 +28,6 @@ class HGVSExplained(object):
             assert( isinstance(e, HGVSExplained) )
             self.parse_explain.append(e)
 
+    def as_json( self ):
+        json_str = json.dumps(self, indent=2)
+        return json_str
