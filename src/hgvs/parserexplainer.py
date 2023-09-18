@@ -81,6 +81,13 @@ class ParserExplainer(object):
 
             return [ hgvs_e ]
         
+        elif( char_pos == 1 ):
+            print("Invalid character at position {c}. Possibly missing RefSeq. Expected syntax: NM_000097.7:c.814A>C".format(c = char_pos))
+
+            hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='invalid char' )
+            
+            return [ hgvs_e ]
+
         elif re.search("one of .+ or a digit$", expected_str):
             print("'{l}' is not a valid character. Invalid character at position {c} in string {v}.".format(c=char_pos, v=v, l = v[char_pos]))
             
@@ -99,15 +106,17 @@ class ParserExplainer(object):
 
                 return results
         
-        elif re.search("'c', 'g', 'm', 'n', 'p', or 'r", exc):
-            print("Invalid HGVS pattern (missing ResidueType). Expected syntax: ReferenceSequence:ResidueType.Interval. Example: NM_000097.7:c.814A>C")
-        elif char_pos == 1:
-            print("Invalid character at position {c}. Possibly missing RefSeq. Expected syntax: NM_000097.7:c.814A>C".format(c = char_pos))
-
             hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='contains invalid char')
             
             return [ hgvs_e ]
+
+        elif re.search("'c', 'g', 'm', 'n', 'p', or 'r", exc):
+            print("Invalid HGVS pattern (missing ResidueType). Expected syntax: ReferenceSequence:ResidueType.Interval. Example: NM_000097.7:c.814A>C")
+
+            hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='missing residue type')
             
+            return [ hgvs_e ]
+
         else:
             print("got [{v}], expected [{s}]".format(v=v, s=expected_str) )
 
