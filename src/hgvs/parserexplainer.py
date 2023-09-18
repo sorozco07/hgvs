@@ -31,15 +31,15 @@ class ParserExplainer(object):
         self._orig_var_string = v
 
         try:
-            print("trying to parse [{v}]".format(v=v))
+            logging.info("trying to parse [{v}]".format(v=v))
             hgvs = self._hgvs_parser.parse_hgvs_variant(v)
-            print("got a {t} object and putting it in hgvs_obj".format(t=type(hgvs)))
+            logging.info("got a {t} object and putting it in hgvs_obj".format(t=type(hgvs)))
             return HGVSExplained( orig_var_string=v, hgvs_obj=hgvs )
         except HGVSParseError as exc:
-            print("HGVS parsing failed, calling _explain()")
+            logging.info("HGVS parsing failed, calling _explain()")
             hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='TBD' )
             expl_list = self._explain(v, exc) # this should return a list of HGVSExplained objects
-            print("got results from explaining [{v}], [{n}] elements in list".format(v=v, n=len(expl_list)))
+            logging.info("got results from explaining [{v}], [{n}] elements in list".format(v=v, n=len(expl_list)))
             hgvs_e.add_explained( *expl_list )
             return hgvs_e
 
@@ -48,8 +48,7 @@ class ParserExplainer(object):
         match = re.search( "char (\d+): expected (.+)$", exc.args[0] )
 
         if( not match ):
-            msg = "[{v}] bombed, cannot handle this error yet: {exc}".format(v=v, exc=exc)
-            raise exc( msg ) # pass the exception through (todo: check syntax)
+            self.raise_exc(v, exc)
 
         char_pos = int(match.group(1))
         expected_str = match.group(2)
@@ -75,7 +74,7 @@ class ParserExplainer(object):
             # checking for 'p.' and '{AA}{\d+}{AA}'
             m = re.search( "p\..*([a-zA-Z][a-zA-Z]{2}?)(\d+)([a-zA-Z][a-zA-Z]{2}?)", exc.args[0], flags=re.IGNORECASE )
             if( m ):
-                print("chunk [{v}] looks like a p. string: [p.][{g1}][{g2}][{g3}]".format(v=v, g1=m.group(1), g2=m.group(2), g3=m.group(3) ) )
+                logging.info("chunk [{v}] looks like a p. string: [p.][{g1}][{g2}][{g3}]".format(v=v, g1=m.group(1), g2=m.group(2), g3=m.group(3) ) )
 
             hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='looks like a p.')
 
@@ -89,14 +88,13 @@ class ParserExplainer(object):
             return [ hgvs_e ]
 
         elif re.search("one of .+ or a digit$", expected_str):
-            print("'{l}' is not a valid character. Invalid character at position {c} in string {v}.".format(c=char_pos, v=v, l = v[char_pos]))
+            logging.error("'{l}' is not a valid character. Invalid character at position {c} in string {v}.".format(c=char_pos, v=v, l = v[char_pos]))
             
-            # c_variant_p_variant = r"^(NM.*)(NP.+)"
             c_variant_p_variant = r"^(NM[^,]+), (NP.+)"
             if m := re.search(c_variant_p_variant, v):
                 coding = m.group(1)
                 protein = m.group(2)
-                print("Received two groups [{c}, {p}] but expecting input only expected one.".format(c=coding, p = protein))
+                logging.info("Received two groups [{c}, {p}] but expecting input only expected one.".format(c=coding, p = protein))
 
                 # try to parse each half separately
                 results = []
@@ -118,9 +116,18 @@ class ParserExplainer(object):
             return [ hgvs_e ]
 
         else:
-            print("got [{v}], expected [{s}]".format(v=v, s=expected_str) )
+            logging.info("got [{v}], expected [{s}]".format(v=v, s=expected_str) )
 
             hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='expected {s}'.format(s=expected_str))
             
             return [ hgvs_e ]
     
+    def raise_exc(self, v, exc) -> Exception:
+        msg = "[{v}] bombed, cannot handle this error yet: {exc}".format(v=v, exc=exc)
+        raise exc( msg )
+    
+    def log_invalid_hgvs(self):
+        logging.error("Invalid HGVS pattern (missing ResidueType). Expected syntax: ReferenceSequence:ResidueType.Interval. Example: NM_000097.7:c.814A>C")
+    
+    def log_invalid_start_char(self, char_pos=1):
+        logging.error("Invalid character at position {c}. Possibly missing RefSeq. Expected syntax: NM_000097.7:c.814A>C".format(c = char_pos))
