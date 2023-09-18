@@ -31,7 +31,8 @@ class ParserExplainer(object):
         self._orig_var_string = v
 
         try:
-            return self._hgvs_parser.parse_hgvs_variant(v)
+            hgvs = self.parse_hgvs_variant(v)
+            return HGVSExplained( orig_var_string=v, hgvs_obj=hgvs )
         except HGVSParseError as exc:
             hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='TBD' )
             expl_list = self._explain(v, exc) # this should return a list of HGVSExplained objects
