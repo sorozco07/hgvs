@@ -10,7 +10,7 @@ class HGVSExplained(object):
 
     """
 
-    def __init__(self, *, orig_var_string, hgvs_obj, hgvs_parser_exc, hgvs_error_type ):
+    def __init__(self, *, orig_var_string, hgvs_obj=None, hgvs_parser_exc=None, hgvs_error_type=None ):
         self.orig_var_string = orig_var_string
         self.hgvs_obj = hgvs_obj
         self.hgvs_parser_exc = hgvs_parser_exc
@@ -23,7 +23,8 @@ class HGVSExplained(object):
         #   hgvs_parser_exception and hgvs_error_type will be populated
         #   if attempt rescue, then parse_explain also will be populated
 
-    def add_explained(self, expl):
-        assert( isinstance(expl, HGVSExplained) )
-        self.parse_explain.append(expl)
+    def add_explained(self, *expl_list):
+        for e in expl_list:
+            assert( isinstance(e, HGVSExplained) )
+            self.parse_explain.append(e)
 
