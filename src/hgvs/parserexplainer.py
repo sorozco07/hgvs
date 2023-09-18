@@ -5,7 +5,6 @@ to the official HGVS spec (when initial parsing throws an exception).
 
 """
 
-import json
 import re
 from hgvs.hgvsexplained import HGVSExplained
 import logging

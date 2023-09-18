@@ -2,6 +2,8 @@
 
 """
 
+import json
+
 
 class HGVSExplained(object):
     """Represents ...
