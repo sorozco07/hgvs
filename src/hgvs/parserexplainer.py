@@ -6,6 +6,7 @@ to the official HGVS spec (when initial parsing throws an exception).
 """
 
 import re
+from hgvsexplained import HGVSExplained
 import logging
 from hgvs.exceptions import HGVSParseError
 
