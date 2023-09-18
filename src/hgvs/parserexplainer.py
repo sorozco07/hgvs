@@ -103,8 +103,4 @@ class ParserExplainer(object):
         else:
             print("got [{v}], expected [{s}]".format(v=v, s=expected_str) )
             return 'test3'
-
-    def as_json( self ):
-        json_str = json.dumps(self, indent=2)
-        return json_str
     
