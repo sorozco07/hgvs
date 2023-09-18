@@ -6,7 +6,7 @@ to the official HGVS spec (when initial parsing throws an exception).
 """
 
 import re
-from hgvsexplained import HGVSExplained
+from hgvs.hgvsexplained import HGVSExplained
 import logging
 from hgvs.exceptions import HGVSParseError
 
@@ -31,7 +31,7 @@ class ParserExplainer(object):
         self._orig_var_string = v
 
         try:
-            hgvs = self.parse_hgvs_variant(v)
+            hgvs = self._hgvs_parser.parse_hgvs_variant(v)
             return HGVSExplained( orig_var_string=v, hgvs_obj=hgvs )
         except HGVSParseError as exc:
             hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='TBD' )
@@ -43,9 +43,9 @@ class ParserExplainer(object):
     def _explain(self, v, exc):
         match = re.search( "char (\d+): expected (.+)$", exc.args[0] )
 
-            if( not match ):
-                msg = "[{v}] bombed, cannot handle this error yet: {exc}".format(v=v, exc=exc)
-                raise exc( msg ) # pass the exception through (todo: check syntax)
+        if( not match ):
+            msg = "[{v}] bombed, cannot handle this error yet: {exc}".format(v=v, exc=exc)
+            raise exc( msg ) # pass the exception through (todo: check syntax)
 
         char_pos = int(match.group(1))
         expected_str = match.group(2)
