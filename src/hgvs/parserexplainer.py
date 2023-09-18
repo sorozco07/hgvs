@@ -5,6 +5,7 @@ to the official HGVS spec (when initial parsing throws an exception).
 
 """
 
+import json
 import re
 from hgvs.hgvsexplained import HGVSExplained
 import logging
@@ -69,31 +70,16 @@ class ParserExplainer(object):
                 result_obj = self.parse_hgvs_variant_explain( part )
                 results.append(result_obj)
 
-                """if( isinstance(result_obj, ) ):
-                    # Valid HGVS expression, got an HGVS object
-                    print("rescued and parsed part [{p}], creating HGVSE obj and populating hgvs_obj".format(p=part))
-                    hgvs_e = HGVSExplained( orig_var_string=part, hgvs_obj=hgvs )
-                    results.append(hgvs_e)
-                else:
-                    # Invalid expression that is not handled by ParserExplainer
-                    hgvs_e = HGVSExplained( orig_var_string=part )
-
-                    results.append(hgvs_e)
-                    # create hgvs_e, add to results
-                    pass
-                    #hgvs_e = HGVSExplained( orig_var_string=part1, hgvs_parser_exc=exc, hgvs_error_type='TBD' )
-                    #expl_list = self._explain(v, exc) # this should return a list of HGVSExplained objects
-                    # return HGVSExplained object
-                       #def __init__(self, *, orig_var_string, hgvs_obj=None, hgvs_parser_exc=None, hgvs_error_type=None ):
-                """
             return results
-
 
         elif( expected_str == "a digit" ):
             # checking for 'p.' and '{AA}{\d+}{AA}'
             m = re.search( "p\..*([a-zA-Z][a-zA-Z]{2}?)(\d+)([a-zA-Z][a-zA-Z]{2}?)", exc.args[0], flags=re.IGNORECASE )
             if( m ):
                 print("chunk [{v}] looks like a p. string: [p.][{g1}][{g2}][{g3}]".format(v=v, g1=m.group(1), g2=m.group(2), g3=m.group(3) ) )
+
+            hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='looks like a p.')
+            return [ hgvs_e ]
         
         elif re.search("one of .+ or a digit$", expected_str):
             print("'{l}' is not a valid character. Invalid character at position {c} in string {v}.".format(c=char_pos, v=v, l = v[char_pos]))
@@ -112,6 +98,13 @@ class ParserExplainer(object):
                 protein_parse = self._hgvs_parser.parse( protein, explain=True )
                 if( protein_parse ):
                     print("rescued and parsed part2:", protein)
+            return 'test2'
             
         else:
             print("got [{v}], expected [{s}]".format(v=v, s=expected_str) )
+            return 'test3'
+
+    def as_json( self ):
+        json_str = json.dumps(self, indent=2)
+        return json_str
+    
