@@ -2,7 +2,6 @@
 
 """
 
-
 class HGVSExplained(object):
     """Represents ...
 
@@ -28,6 +27,15 @@ class HGVSExplained(object):
             assert( isinstance(e, HGVSExplained) )
             self.parse_explain.append(e)
 
-    def as_json( self ):
-        json_str = json.dumps(self, indent=2)
-        return json_str
+    def pprint(self, indent_step=4, current_indent=0):
+        obj_type = 'HGVSExplained object'
+        if( self.hgvs_obj ):
+            obj_type = 'HGVS object'
+        
+        s = "[{v}] => [{obj_type}]".format(v=self.orig_var_string, obj_type=obj_type)
+        indent_str = ' ' * current_indent
+        print( "{i}{s}".format(i=indent_str, s=s) )
+
+        for item in self.parse_explain:
+            item.pprint( indent_step, current_indent + indent_step )
+
