@@ -78,6 +78,7 @@ class ParserExplainer(object):
                 print("chunk [{v}] looks like a p. string: [p.][{g1}][{g2}][{g3}]".format(v=v, g1=m.group(1), g2=m.group(2), g3=m.group(3) ) )
 
             hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='looks like a p.')
+
             return [ hgvs_e ]
         
         elif re.search("one of .+ or a digit$", expected_str):
@@ -89,17 +90,23 @@ class ParserExplainer(object):
                 coding = m.group(1)
                 protein = m.group(2)
                 print("Received two groups [{c}, {p}] but expecting input only expected one.".format(c=coding, p = protein))
-                
+
                 # try to parse each half separately
-                coding_parse = self._hgvs_parser.parse( coding, explain=True )
-                if( coding_parse ):
-                    print("rescued and parsed part1:", coding)
-                protein_parse = self._hgvs_parser.parse( protein, explain=True )
-                if( protein_parse ):
-                    print("rescued and parsed part2:", protein)
-            return 'test2'
+                results = []
+                for part in ( coding, protein):
+                    result_obj = self.parse_hgvs_variant_explain( part )
+                    results.append(result_obj)
+
+                return results
+
+            hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='contains invalid char')
+            
+            return [ hgvs_e ]
             
         else:
             print("got [{v}], expected [{s}]".format(v=v, s=expected_str) )
-            return 'test3'
+
+            hgvs_e = HGVSExplained( orig_var_string=v, hgvs_parser_exc=exc, hgvs_error_type='expected {s}'.format(s=expected_str))
+            
+            return [ hgvs_e ]
     
